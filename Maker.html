@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Animal Company Item Maker By Richard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+      background-color: #f9f9f9;
+      color: #222;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+    .dark-mode input,
+    .dark-mode select,
+    .dark-mode textarea {
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+      border: 1px solid #555;
+    }
+    h1 { margin-bottom: 10px; }
+    h3 { margin-top: 0; }
+    .slot-container {
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-bottom: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+    }
+    .dark-mode .slot-container {
+      background-color: #1a1a1a;
+      border-color: #333;
+    }
+    label {
+      display: block;
+      margin: 8px 0 4px;
+    }
+    input, select {
+      padding: 5px;
+      width: 100%;
+      max-width: 300px;
+      margin-bottom: 5px;
+    }
+    textarea {
+      width: 100%;
+      height: 300px;
+      padding: 10px;
+      font-family: monospace;
+    }
+    button {
+      padding: 8px 14px;
+      margin-right: 10px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    .child-block {
+      border-left: 2px solid #999;
+      padding-left: 15px;
+      margin-top: 10px;
+    }
+    #modeToggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+    .remove-btn {
+      background-color: #f44336;
+      color: white;
+      border: none;
+      margin-top: 5px;
+    }
+    .color-preview {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      border: 1px solid #999;
+      margin-left: 10px;
+      vertical-align: middle;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <button id="modeToggle" onclick="toggleMode()">Toggle Light/Dark</button>
+  <h1>Animal Company Item Maker By Richard</h1>
+
+  <div id="slotEditors"></div>
+
+  <button onclick="generateJSON()">Generate JSON</button>
+  <button onclick="downloadJSON()">Download JSON</button>
+
+  <h3>Generated JSON:</h3>
+  <textarea id="jsonOutput" readonly></textarea>
+
+  <script>
+    const slots = ["back", "leftHand", "rightHand", "leftHip", "rightHip"];
+    const itemIDs = [
+      "None", "item_apple", "item_arrow", "item_arrow_heart", "item_arrow_lightbulb",
+      "item_backpack", "item_backpack_black", "item_backpack_green", "item_backpack_large_base",
+      "item_backpack_large_clover", "item_backpack_large_basketball", "item_backpack_pink",
+      "item_backpack_small_base", "item_backpack_white", "item_backpack_with_flashlight",
+      "item_balloon", "item_balloon_heart", "item_banana", "item_baseball_bat", "item_big_cup",
+      "item_boombox", "item_box_fan", "item_calculator", "item_cardboard_box", "item_cash",
+      "item_cash_pile", "item_cash_mega_pile", "item_clapper", "item_cluster_grenade", "item_cola",
+      "item_cola_large", "item_company_ration", "item_company_ration_heal", "item_cracker", "item_crate",
+      "item_crossbow", "item_crossbow_heart", "item_crowbar", "item_disc", "item_disposable_camera",
+      "item_dynamite", "item_dynamite_cube", "item_egg", "item_flaregun", "item_flashbang",
+      "item_flashlight", "item_flashlight_mega", "item_flashlight_red", "item_floppy3", "item_floppy5",
+      "item_football", "item_frying_pan", "item_glowstick", "item_goldbar", "item_grenade",
+      "item_heart_chunk", "item_heart_gun", "item_heartchocolatebox", "item_hh_key", "item_hookshot",
+      "item_hoverpad", "item_impulse_grenade", "item_jetpack", "item_keycard", "item_lance",
+      "item_large_banana", "item_mug", "item_nut", "item_ogre_hands", "item_ore_copper_l",
+      "item_ore_copper_m", "item_ore_copper_s", "item_ore_gold_l", "item_ore_gold_m", "item_ore_gold_s",
+      "item_ore_hell", "item_ore_silver_l", "item_ore_silver_m", "item_ore_silver_s", "item_painting_canvas",
+      "item_paperpack", "item_pelican_case", "item_pickaxe", "item_pickaxe_cny", "item_pickaxe_cube",
+      "item_pipe", "item_plunger", "item_pogostick", "item_police_baton", "item_pumpkin_pie",
+      "item_pumpkinjack", "item_pumpkinjack_small", "item_quiver", "item_quiver_heart",
+      "item_radioactive_broccoli", "item_randombox_mobloot_big", "item_randombox_mobloot_medium",
+      "item_randombox_mobloot_small", "item_randombox_mobloot_weapons", "item_revolver",
+      "item_revolver_ammo", "item_rope", "item_rpg", "item_rpg_ammo", "item_rpg_cny", "item_rubberducky",
+      "item_ruby", "item_saddle", "item_scanner", "item_scissors", "item_shield", "item_shield_bones",
+      "item_shield_police", "item_shotgun", "item_shotgun_ammo", "item_shredder", "item_shrinking_broccoli",
+      "item_snowball", "item_stapler", "item_stick_armbones", "item_stick_bone", "item_sticker_dispenser",
+      "item_sticky_dynamite", "item_stinky_cheese", "item_tablet", "item_tapedispenser", "item_tele_grenade",
+      "item_theremin", "item_timebomb", "item_toilet_paper", "item_toilet_paper_mega",
+      "item_toilet_paper_roll_empty", "item_treestick", "item_tripwire_explosive", "item_trophy",
+      "item_turkey_leg", "item_turkey_whole", "item_umbrella", "item_umbrella_clover", "item_unidentified",
+      "item_upsidedown_loot", "item_uranium_chunk_l", "item_uranium_chunk_m", "item_uranium_chunk_s",
+      "item_whoopie", "item_zipline_gun", "item_rpg_easter", "item_rpg_ammo_egg", "item_revolver_gold"
+    ];
+
+    function toggleMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+
+    function createItemEditor() {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'slot-container';
+      wrapper.innerHTML = `
+        <label>Item ID:</label>
+        <select class="item-id">
+          ${itemIDs.map(id => `<option value="${id}">${id}</option>`).join('')}
+        </select>
+        <div class="color-preview"></div>
+        <label>Hue: <input type="number" class="hue" value="0"></label>
+        <label>Saturation: <input type="number" class="saturation" value="0"></label>
+        <label>State: <input type="number" class="state" value="0"></label>
+        <label>Ammo: <input type="number" class="ammo" value="0"></label>
+        <label>Scale Modifier: <input type="number" class="scale" value="0"></label>
+        <div class="children-container"></div>
+        <button onclick="addChildItem(this)">Add Child</button>
+      `;
+      attachColorPreviewListeners(wrapper);
+      return wrapper;
+    }
+
+    function addChildItem(button) {
+      const container = button.parentElement.querySelector('.children-container');
+      const child = document.createElement('div');
+      child.className = 'child-block';
+      child.innerHTML = `
+        <label>Item ID:</label>
+        <select class="item-id">
+          ${itemIDs.map(id => `<option value="${id}">${id}</option>`).join('')}
+        </select>
+        <div class="color-preview"></div>
+        <label>Hue: <input type="number" class="hue" value="0"></label>
+        <label>Saturation: <input type="number" class="saturation" value="0"></label>
+        <label>State: <input type="number" class="state" value="0"></label>
+        <label>Ammo: <input type="number" class="ammo" value="0"></label>
+        <label>Scale Modifier: <input type="number" class="scale" value="0"></label>
+        <div class="children-container"></div>
+        <button onclick="addChildItem(this)">Add Child</button>
+        <button class="remove-btn" onclick="this.parentElement.remove()">Remove</button>
+      `;
+      attachColorPreviewListeners(child);
+      container.appendChild(child);
+    }
+
+    function attachColorPreviewListeners(container) {
+      const hueInput = container.querySelector('.hue');
+      const satInput = container.querySelector('.saturation');
+      [hueInput, satInput].forEach(input =>
+        input.addEventListener('input', updateColorPreviews)
+      );
+    }
+
+    function updateColorPreviews() {
+      document.querySelectorAll('.slot-container, .child-block').forEach(container => {
+        const hue = parseFloat(container.querySelector('.hue')?.value || 0);
+        const sat = parseFloat(container.querySelector('.saturation')?.value || 0);
+        const preview = container.querySelector('.color-preview');
+        if (preview) {
+          preview.style.backgroundColor = `hsl(${hue}, ${sat}%, 50%)`;
+        }
+      });
+    }
+
+    function getItemData(container) {
+      const itemID = container.querySelector('.item-id').value;
+      if (itemID === "None") return null;
+
+      const item = { itemID };
+      const hue = parseFloat(container.querySelector('.hue').value);
+      const sat = parseFloat(container.querySelector('.saturation').value);
+      const state = parseFloat(container.querySelector('.state').value);
+      const ammo = parseFloat(container.querySelector('.ammo').value);
+      const scale = parseFloat(container.querySelector('.scale').value);
+      if (hue) item.colorHue = hue;
+      if (sat) item.colorSaturation = sat;
+      if (state) item.state = state;
+      if (ammo) item.ammo = ammo;
+      if (scale) item.scaleModifier = scale;
+
+      const children = Array.from(container.querySelectorAll(':scope > .children-container > .child-block'))
+        .map(getItemData).filter(Boolean);
+      if (children.length) item.children = children;
+      return item;
+    }
+
+    function generateJSON() {
+      const result = {};
+      for (const slot of slots) {
+        const editor = document.getElementById(`editor-${slot}`);
+        const data = getItemData(editor);
+        if (data) result[slot] = data;
+      }
+      document.getElementById('jsonOutput').value = JSON.stringify(result, null, 2);
+    }
+
+    function downloadJSON() {
+      const json = document.getElementById('jsonOutput').value;
+      if (!json) return alert("Generate JSON first.");
+      const blob = new Blob([json], { type: "application/json" });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = "bypass_bag.json";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    window.onload = () => {
+      const container = document.getElementById('slotEditors');
+      for (const slot of slots) {
+        const wrapper = document.createElement('div');
+        wrapper.id = `editor-${slot}`;
+        wrapper.className = 'slot-container';
+        wrapper.innerHTML = `<h3>${slot}</h3>`;
+        wrapper.appendChild(createItemEditor());
+        container.appendChild(wrapper);
+      }
+      updateColorPreviews();
+    };
+  </script>
+</body>
+</html>
